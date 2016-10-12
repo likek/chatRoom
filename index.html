@@ -4,11 +4,55 @@
     <meta charset="UTF-8">
     <title>index</title>
     <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
-
+<div>
+    <!--消息发送-->
+    <div class="container"  class="col-lg-6">
+        <div class="row">
+                <div class="input-group">
+                    <input type="text" class="form-control"  id="text" autocomplete="off">
+                    <span class="input-group-btn">
+        <button class="btn btn-default" type="button" id="subm">发送</button>
+      </span>
+                </div>
+        </div>
+        <!--消息展示列表-->
+        <div id="txtarea"></div>
+    </div>
+</div>
 </body>
 <script>
-    var socket=io();
+    var socket = io();
+    var txt = $('#text');
+    var subm = $('#subm');
+    var txtarea = $('#txtarea');
+
+    /*****提交事件*****/
+    subm.click(function () {
+        handle()
+    });
+    $(document).keydown(function (e) {
+        if (e.keyCode === 13) {
+            handle();
+        }
+    });
+
+    /******接受后台消息*******/
+    socket.on('tiwen', function (mes) {
+        //获取当前时间
+        var date=new Date(),hour=date.getHours(),min=date.getMinutes(),sec=date.getSeconds();
+        date=hour+':'+min+':'+sec;
+        //消息追加
+        txtarea.prepend('<div class="alert alert-success" role="alert">'+date+'&nbsp;&nbsp;'+mes+'</div>');
+    });
+
+    /*******提交时******/
+    function handle() {
+        socket.emit('tiwen', txt.val());
+        txt.val('');
+    }
 </script>
 </html>

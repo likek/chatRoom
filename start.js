@@ -1,19 +1,26 @@
 /**
  * Created by likeke on 16-10-12.
  */
-var http=require('http');
-var fs=require('fs');
-var serve=http.createServer(function (req, res) {
-    if (req.url==='/'){
-        fs.readFile('./index.html',function (err, data) {
-            res.end(data);
-        })
-    }
+var express=require('express');
+var app=express();
+var http=require('http').Server(app);
+var io=require('socket.io')(http);
+
+app.use('/node_modules',express.static('node_modules'));
+
+app.get('/',function (req, res) {
+    res.sendFile(__dirname+'/index.html');
 });
 
-var socket=require('socket.io')(serve);
-socket.on('connection',function (socket) {
+io.on('connection',function (socket) {
     console.log('一个用户连接成功');
+    socket.on('tiwen',function (mes) {
+        console.log('得到了:'+mes);
+        //广播
+        io.emit('tiwen',mes);
+    });
 });
 
-serve.listen(3000,'127.0.0.1');
+http.listen(3000,function () {
+    console.log('listening on *:3000');
+});
