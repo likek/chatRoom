@@ -4,14 +4,28 @@
     <meta charset="UTF-8">
     <title>index</title>
     <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
-    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
 </head>
+<style>
+.container{
+    margin-top:10rem;
+}
+</style>
 <body>
 <div>
     <!--消息发送-->
-    <div class="container"  class="col-lg-6">
-        <div class="row">
+    <div class="container">
+      <div class="row col-lg-2">
+                <div class="input-group">
+                    <input type="text" class="form-control"  id="room_id" autocomplete="off"　placeholder='输入房间号'>
+                    <span class="input-group-btn">
+        <button class="btn btn-default" type="button" id="goto_room">进入此房间</button>
+      </span>
+                </div>
+        </div>
+       <button type="button" class="btn btn-default btn-lg" id="create_room">新建房间</button>
+        <div class="row col-lg-6">
                 <div class="input-group">
                     <input type="text" class="form-control"  id="text" autocomplete="off">
                     <span class="input-group-btn">
@@ -25,21 +39,23 @@
 </div>
 </body>
 <script>
-    var socket = io();
+    var id=$(window)[0].location.pathname.substr(6);
     var txt = $('#text');
     var subm = $('#subm');
     var txtarea = $('#txtarea');
-
+    var create_room=$('#create_room');
+    var goto_room=$('#goto_room');
     /*****提交事件*****/
     subm.click(function () {
-        handle()
+        handle();
     });
     $(document).keydown(function (e) {
         if (e.keyCode === 13) {
             handle();
         }
     });
-
+    
+    var socket =io('/room/'+id);
     /******接受后台消息*******/
     socket.on('tiwen', function (mes) {
         //获取当前时间
@@ -51,8 +67,28 @@
 
     /*******提交时******/
     function handle() {
-        socket.emit('tiwen', txt.val());
-        txt.val('');
+        if(txt.val()){
+            socket.emit('tiwen', txt.val());
+            txt.val('');
+        }
     }
+    /*********创建新的房间*********/
+    create_room.click(function(){
+        $.post('/create',{},function(data){
+            $(window)[0].location.pathname='/room/'+data.id;
+        })
+    })
+    /*********进入指定的房间*********/
+    goto_room.click(function(){
+        var room=$('#room_id').val();
+        $.post('/goto',{
+            'room':room
+        },function(data){
+            console.log(data);
+            if(data.stat=='1'){
+                 $(window)[0].location.pathname='/room/'+room;
+            }
+        })
+    })
 </script>
 </html>
