@@ -1,2 +1,1 @@
-# chatRoom
-nodejs简易聊天室，使用socket.io
+# socket.io小练习-聊天室
